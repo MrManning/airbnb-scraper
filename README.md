@@ -13,7 +13,13 @@ Goal: Scrape the Airbnb website for useful information about a property includin
 
 ## Running the project
 ### Requirements
-- Python 3.9
+- [python](https://www.python.org/downloads/) 3.9.10 (or via Homebrew `brew install python`)
+- pip 22.0.3 (installed with Python)
+
+To install all python packages you should run the command:
+```
+pip install -r requirements.txt
+```
 
 ### Main program
 From the project root enter in the terminal:
