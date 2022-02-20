@@ -7,43 +7,47 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import pathlib
 
 
 class Property:
-    def __init__(self, url=None, file=None):
-        if url is not None:
-            html = self.get_property_listing(url)
-            self.data = self.parse_html(html)
-        else:
-            with open(file, "r", encoding='utf-8') as f:
-                text = f.read()
-            self.data = self.parse_html(text)
-
+    def __init__(self, html=None):
+        self.html = html
         self.property_name = self.get_property_name()
         self.property_details = self.get_property_details()
 
-    def parse_html(self, html):
-        return BeautifulSoup(html, "html5lib")
+    def get_html(self):
+        return self._html
 
-    def get_property_listing(self, url):
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        browser = webdriver.Chrome(service=Service(
-            ChromeDriverManager(log_level=0).install()), options=chrome_options)
-        browser.get(url)
-        time.sleep(2)
+    def set_html(self, value):
+        protocols = ["https://", "http://"]
+        domains = [".co.uk", ".com"]
 
-        html = browser.page_source
-        browser.quit()
-        return html
+        if value.startswith(tuple(protocols)) or value.endswith(tuple(domains)) and "\n" not in value:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            browser = webdriver.Chrome(service=Service(
+                ChromeDriverManager(log_level=0).install()), options=chrome_options)
+            browser.get(value)
+            time.sleep(2)
+
+            text = browser.page_source
+            browser.quit
+        elif pathlib.Path(value).exists():
+            with open(value, "r") as f:
+                text = f.read()
+        else:
+            text = value
+
+        self._html = BeautifulSoup(text, "html5lib")
 
     def get_property_name(self):
-        name = self.data.find(
+        name = self.html.find(
             attrs={"data-section-id": "TITLE_DEFAULT"}).find("h1")
         return name.get_text() if name is not None else "Property name not found"
 
     def get_property_details(self):
-        overview = self.data.find(
+        overview = self.html.find(
             attrs={"data-section-id": "OVERVIEW_DEFAULT"}).find("ol")
 
         bedrooms = self.extract_property_details(overview, "bedroom", 1)
@@ -65,7 +69,7 @@ class Property:
                 property_detail_by_index = None
             property_detail = property_detail_by_index
 
-        return property_detail.get_text() if property_detail is not None else f"unable to scrape {detail_name}s"
+        return property_detail.get_text() if len(property_detail) else f"unable to scrape {detail_name}s"
 
     def __str__(self):
         details = cleandoc(f"""Name: {self.property_name}
@@ -75,7 +79,4 @@ class Property:
         """)
         return details
 
-    def write_to_file(self, file_name, contents):
-        f = open(file_name, "w")
-        f.write(contents)
-        f.close()
+    html = property(get_html, set_html)

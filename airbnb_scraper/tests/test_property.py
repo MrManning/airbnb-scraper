@@ -11,13 +11,11 @@ class TestProperty(unittest.TestCase):
 
         test_property_1 = os.path.join(
             TestProperty.directory, "property_with_different_bathroom.html")
-        self.property_with_different_bathroom = Property(
-            file=test_property_1)
+        self.property_with_different_bathroom = Property(test_property_1)
 
         test_property_2 = os.path.join(
             TestProperty.directory, "property_with_no_overview.html")
-        self.property_with_no_overview = Property(
-            file=test_property_2)
+        self.property_with_no_overview = Property(test_property_2)
 
     def test_get_property_name_with_valid_html(self):
         self.assertEqual(self.property.get_property_name(),
