@@ -1,6 +1,6 @@
 import os
 import unittest
-from property import Property
+from property.property import Property
 
 
 class TestProperty(unittest.TestCase):
@@ -8,11 +8,16 @@ class TestProperty(unittest.TestCase):
 
     def setUp(self):
         self.property = Property("https://www.airbnb.co.uk/rooms/45885953")
+
         test_property_1 = os.path.join(
             TestProperty.directory, "property_with_different_bathroom.html")
-
         self.property_with_different_bathroom = Property(
             file=test_property_1)
+
+        test_property_2 = os.path.join(
+            TestProperty.directory, "property_with_no_overview.html")
+        self.property_with_no_overview = Property(
+            file=test_property_2)
 
     def test_get_property_name_with_valid_html(self):
         self.assertEqual(self.property.get_property_name(),
@@ -31,8 +36,8 @@ class TestProperty(unittest.TestCase):
             "bedrooms": "2 bedrooms", "bathrooms": "Toilet with sink"})
 
     def test_get_property_details_with_no_bathroom(self):
-        self.assertEqual(self.property.get_property_details(), {
-                         "bedrooms": "1 bedroom", "bathrooms": "unable to scrape bathrooms"})
+        self.assertEqual(self.property_with_no_overview.get_property_details(), {
+                         "bedrooms": "unable to scrape bedrooms", "bathrooms": "unable to scrape bathrooms"})
 
     def test_print_property(self):
         self.assertEqual(

@@ -1,4 +1,4 @@
-from property import Property
+from property.property import Property
 
 
 def main():
