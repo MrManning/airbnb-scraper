@@ -32,7 +32,7 @@ class Property:
             time.sleep(2)
 
             text = browser.page_source
-            browser.quit
+            browser.quit()
         elif pathlib.Path(value).exists():
             with open(value, "r") as f:
                 text = f.read()
@@ -48,12 +48,14 @@ class Property:
 
     def get_property_details(self):
         overview = self.html.find(
-            attrs={"data-section-id": "OVERVIEW_DEFAULT"}).find("ol")
+            attrs={"data-section-id": "OVERVIEW_DEFAULT"})
+        overview_list = overview.find("ol")
 
-        bedrooms = self.extract_property_details(overview, "bedroom", 1)
-        bathrooms = self.extract_property_details(overview, "bathroom", 2)
+        bedrooms = self.extract_property_details(overview_list, "bedroom", 1)
+        bathrooms = self.extract_property_details(overview_list, "bathroom", 2)
+        property_type = self.get_property_type(overview)
 
-        return {"bedrooms": bedrooms, "bathrooms": bathrooms}
+        return {"type": property_type, "bedrooms": bedrooms, "bathrooms": bathrooms}
 
     def extract_property_details(self, overview, detail_name, detail_index):
         property_detail = overview.find(
@@ -69,10 +71,19 @@ class Property:
                 property_detail_by_index = None
             property_detail = property_detail_by_index
 
-        return property_detail.get_text() if len(property_detail) else f"unable to scrape {detail_name}s"
+        return property_detail.get_text() if len(property_detail) else f"unable to find {detail_name}s"
+
+    def get_property_type(self, overview):
+        header = overview.find("h2")
+        try:
+            if len(header):
+                return header.get_text().split("hosted")[0].strip()
+        except TypeError:
+            return "unable to find property type"
 
     def __str__(self):
         details = cleandoc(f"""Name: {self.property_name}
+        Type: {self.property_details.get("type")}
         Bedrooms: {self.property_details.get("bedrooms")}
         Bathrooms: {self.property_details.get("bathrooms")}
         {'-' * 30}
