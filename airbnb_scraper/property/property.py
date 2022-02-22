@@ -42,18 +42,38 @@ class Property:
         self._html = BeautifulSoup(text, "html5lib")
 
     def get_property_name(self):
-        name = self.html.find(
-            attrs={"data-section-id": "TITLE_DEFAULT"}).find("h1")
+        if self.html:
+            try:
+                name = self.html.find(
+                    attrs={"data-section-id": "TITLE_DEFAULT"}).find("h1")
+            except AttributeError as err:
+                print(f"Cannot find property name: {err}")
+                name = None
+        else:
+            name = None
         return name.get_text() if name is not None else "Property name not found"
 
     def get_property_details(self):
-        overview = self.html.find(
-            attrs={"data-section-id": "OVERVIEW_DEFAULT"})
-        overview_list = overview.find("ol")
+        if self.html:
+            try:
+                overview = self.html.find(
+                    attrs={"data-section-id": "OVERVIEW_DEFAULT"})
+                overview_list = overview.find("ol")
 
-        bedrooms = self.extract_property_details(overview_list, "bedroom", 1)
-        bathrooms = self.extract_property_details(overview_list, "bathroom", 2)
-        property_type = self.get_property_type(overview)
+                bedrooms = self.extract_property_details(
+                    overview_list, "bedroom", 1)
+                bathrooms = self.extract_property_details(
+                    overview_list, "bathroom", 2)
+                property_type = self.get_property_type(overview)
+            except AttributeError as err:
+                print(f"Cannot find property name: {err}")
+                bedrooms = "Could not find property detail"
+                bathrooms = "Could not find property detail"
+                property_type = "Could not find property detail"
+        else:
+            bedrooms = "Could not find property detail"
+            bathrooms = "Could not find property detail"
+            property_type = "Could not find property detail"
 
         return {"type": property_type, "bedrooms": bedrooms, "bathrooms": bathrooms}
 
