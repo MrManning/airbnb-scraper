@@ -18,8 +18,6 @@ class TestProperty(unittest.TestCase):
         self.property_with_no_overview = Property(test_property_2)
 
     def test_get_property_name_with_valid_html(self):
-        # print("inside the test function")
-        # print(self.property)
         self.assertEqual(self.property.property_name,
                          "Luxury Kabin Surrounded by Nature + Outdoor Bath!", "incorrect property name")
 
@@ -44,6 +42,13 @@ class TestProperty(unittest.TestCase):
             "bedrooms": "Unable to find property detail",
             "bathrooms": "Unable to find property detail"
         })
+
+    def test_get_property_type(self):
+        self.assertEqual(self.property.property_type, "Tiny house")
+        self.assertEqual(
+            self.property_with_different_bathroom.property_type, "Tiny house")
+        self.assertEqual(
+            self.property_with_no_overview.property_type, "Unable to find property type")
 
     def test_print_property(self):
         self.assertEqual(

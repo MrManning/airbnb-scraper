@@ -75,9 +75,9 @@ class Property:
                 self._property_type = found_property_type.get_text().split("hosted")[
                     0].strip()
             except AttributeError:
-                self._property_type = "unable to find property type"
+                self._property_type = "Unable to find property type"
         else:
-            self._property_type = "unable to find property type"
+            self._property_type = "Unable to find property type"
 
     @property
     def property_details(self):
