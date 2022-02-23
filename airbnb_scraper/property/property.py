@@ -8,22 +8,23 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import pathlib
+import validators
 
 
 class Property:
-    def __init__(self, html=None):
+    def __init__(self, html=None, property_name=None, property_type=None, property_details=None):
         self.html = html
-        self.property_name = self.get_property_name()
-        self.property_details = self.get_property_details()
+        self.property_name = property_name
+        self.property_type = property_type
+        self.property_details = property_details
 
-    def get_html(self):
+    @property
+    def html(self):
         return self._html
 
-    def set_html(self, value):
-        protocols = ["https://", "http://"]
-        domains = [".co.uk", ".com"]
-
-        if value.startswith(tuple(protocols)) or value.endswith(tuple(domains)) and "\n" not in value:
+    @html.setter
+    def html(self, value):
+        if validators.url(value):
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             browser = webdriver.Chrome(service=Service(
@@ -39,75 +40,98 @@ class Property:
         else:
             text = value
 
-        self._html = BeautifulSoup(text, "html5lib")
+        self._html = BeautifulSoup(text, "html5lib") or None
 
-    def get_property_name(self):
-        if self.html:
+    @property
+    def property_name(self):
+        return self._property_name
+
+    @property_name.setter
+    def property_name(self, property_name):
+        if property_name:
+            self._property_name = property_name
+        elif self.html:
             try:
-                name = self.html.find(
+                found_name = self.html.find(
                     attrs={"data-section-id": "TITLE_DEFAULT"}).find("h1")
-            except AttributeError as err:
-                print(f"Cannot find property name: {err}")
-                name = None
+                self._property_name = found_name.get_text().strip()
+            except AttributeError:
+                self._property_name = "Property name not found"
         else:
-            name = None
-        return name.get_text() if name is not None else "Property name not found"
+            self._property_name = "Property name not found"
 
-    def get_property_details(self):
-        if self.html:
+    @property
+    def property_type(self):
+        return self._property_type
+
+    @property_type.setter
+    def property_type(self, property_type):
+        if property_type:
+            self._property_type = property_type
+        elif self.html:
             try:
-                overview = self.html.find(
-                    attrs={"data-section-id": "OVERVIEW_DEFAULT"})
-                overview_list = overview.find("ol")
+                found_property_type = self.html.find(
+                    attrs={"data-section-id": "OVERVIEW_DEFAULT"}).find("h2")
+                self._property_type = found_property_type.get_text().split("hosted")[
+                    0].strip()
+            except AttributeError:
+                self._property_type = "unable to find property type"
+        else:
+            self._property_type = "unable to find property type"
 
+    @property
+    def property_details(self):
+        return self._property_details
+
+    @property_details.setter
+    def property_details(self, details):
+        if details:
+            self._property_details = {
+                "bedrooms": details.bedrooms,
+                "bathrooms": details.bathrooms
+            }
+        elif self.html:
+            try:
+                overview_list = self.html.find(
+                    attrs={"data-section-id": "OVERVIEW_DEFAULT"}).find("ol")
                 bedrooms = self.extract_property_details(
                     overview_list, "bedroom", 1)
                 bathrooms = self.extract_property_details(
                     overview_list, "bathroom", 2)
-                property_type = self.get_property_type(overview)
-            except AttributeError as err:
-                print(f"Cannot find property name: {err}")
-                bedrooms = "Could not find property detail"
-                bathrooms = "Could not find property detail"
-                property_type = "Could not find property detail"
+                self._property_details = {
+                    "bedrooms": bedrooms, "bathrooms": bathrooms}
+            except AttributeError:
+                self._property_details = {
+                    "bedrooms": "Unable to find property detail", "bathrooms": "Unable to find property detail"}
         else:
-            bedrooms = "Could not find property detail"
-            bathrooms = "Could not find property detail"
-            property_type = "Could not find property detail"
-
-        return {"type": property_type, "bedrooms": bedrooms, "bathrooms": bathrooms}
+            self._property_details = {
+                "bedrooms": "Unable to find property detail", "bathrooms": "Unable to find property detail"}
 
     def extract_property_details(self, overview, detail_name, detail_index):
-        property_detail = overview.find(
-            "span", text=re.compile(detail_name))
-        if property_detail is None:
-            try:
+        try:
+            property_detail = overview.find(
+                "span", text=re.compile(detail_name))
+
+            if property_detail:
+                return property_detail.get_text().strip()
+            else:
                 spans = overview.find_all("li")[
                     detail_index].find_all("span")
-                property_detail_by_index = spans[1] if len(
+                property_detail = spans[1] if len(
                     spans) == 2 else spans[0]
-            except IndexError as err:
-                print(f"Cannot find property detail: {err}")
-                property_detail_by_index = None
-            property_detail = property_detail_by_index
+                if len(property_detail):
+                    return property_detail.get_text().strip()
+                else:
+                    raise ValueError
 
-        return property_detail.get_text() if len(property_detail) else f"unable to find {detail_name}s"
-
-    def get_property_type(self, overview):
-        header = overview.find("h2")
-        try:
-            if len(header):
-                return header.get_text().split("hosted")[0].strip()
-        except TypeError:
-            return "unable to find property type"
+        except (AttributeError, IndexError, ValueError):
+            return "Unable to find property detail"
 
     def __str__(self):
         details = cleandoc(f"""Name: {self.property_name}
-        Type: {self.property_details.get("type")}
+        Type: {self.property_type}
         Bedrooms: {self.property_details.get("bedrooms")}
         Bathrooms: {self.property_details.get("bathrooms")}
         {'-' * 30}
         """)
         return details
-
-    html = property(get_html, set_html)

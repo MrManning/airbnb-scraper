@@ -18,32 +18,31 @@ class TestProperty(unittest.TestCase):
         self.property_with_no_overview = Property(test_property_2)
 
     def test_get_property_name_with_valid_html(self):
-        self.assertEqual(self.property.get_property_name(),
+        # print("inside the test function")
+        # print(self.property)
+        self.assertEqual(self.property.property_name,
                          "Luxury Kabin Surrounded by Nature + Outdoor Bath!", "incorrect property name")
 
     def test_get_property_name_with_missing_html(self):
-        self.assertEqual(self.property_with_different_bathroom.get_property_name(),
+        self.assertEqual(self.property_with_different_bathroom.property_name,
                          "Property name not found")
 
     def test_get_property_details_with_valid_html(self):
-        self.assertDictEqual(self.property.get_property_details(), {
-            "type": "Tiny house",
+        self.assertDictEqual(self.property.property_details, {
             "bedrooms": "1 bedroom",
             "bathrooms": "1 bathroom"
         })
 
     def test_get_property_details_with_non_standard_bathroom(self):
-        self.assertDictEqual(self.property_with_different_bathroom.get_property_details(), {
-            "type": "Tiny house",
+        self.assertDictEqual(self.property_with_different_bathroom.property_details, {
             "bedrooms": "2 bedrooms",
             "bathrooms": "Toilet with sink"
         })
 
     def test_get_property_details_with_no_bathroom(self):
-        self.assertEqual(self.property_with_no_overview.get_property_details(), {
-            "type": "unable to find property type",
-            "bedrooms": "unable to find bedrooms",
-            "bathrooms": "unable to find bathrooms"
+        self.assertEqual(self.property_with_no_overview.property_details, {
+            "bedrooms": "Unable to find property detail",
+            "bathrooms": "Unable to find property detail"
         })
 
     def test_print_property(self):
