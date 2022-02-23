@@ -56,3 +56,4 @@ python -m unittest
     - They can be manipulated directly
     - Applied to all private variables
 - Implement the Builder pattern for constructing properties (see previous point). Complex objects without allowing external access.
+- Separation of concerns. Property should not need to know how to retrieve the html and only know of the html itself. I would move that to a different class.
