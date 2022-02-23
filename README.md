@@ -38,3 +38,21 @@ From within the folder `airbnb_scraper` enter in the terminal:
 ```
 python -m unittest
 ```
+
+## Unimplemented
+
+### Scraping the first property
+- The plan after some research was to attempt to login as a user with the highest security and privacy protections (phone number and other account info) + verified (supplying a photo id). Although it worked for some not others based on what I read.
+- Using the official API required a key but the request wasn't guaranteed to be granted.
+- Requesting the URL with an authorised header.
+
+### Scraping property amenities
+- Using selenium to open/click certain buttons on the page to produce output that could then be stored.
+
+### General changes
+- Using the `json` response from the site request as `json` is much easier to manipulate and extract data from.
+- Create an interface (Factory) that could be implemented by any site (Airbnb, Booking.com, etc) that needs to be requested from. This would allow for similar methods that need to be managed to be extracted as well as enforce correctness.
+- Remove some getters/setters. These are redundant for private variables and defeats encapsulation if:
+    - They can be manipulated directly
+    - Applied to all private variables
+- Implement the Builder pattern for constructing properties (see previous point). Complex objects without allowing external access.
