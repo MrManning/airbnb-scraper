@@ -1,0 +1,64 @@
+
+
+    
+
+    # def get_property_details(self):
+    #     if self.html:
+    #         try:
+    #             overview = self.html.find(
+    #                 attrs={"data-section-id": "OVERVIEW_DEFAULT"})
+    #             overview_list = overview.find("ol")
+
+    #             bedrooms = self.extract_property_details(
+    #                 overview_list, "bedroom", 1)
+    #             bathrooms = self.extract_property_details(
+    #                 overview_list, "bathroom", 2)
+    #             property_type = self.get_property_type(overview)
+    #         except AttributeError as err:
+    #             print(f"Cannot find property name: {err}")
+    #             bedrooms = "Could not find property detail"
+    #             bathrooms = "Could not find property detail"
+    #             property_type = "Could not find property detail"
+    #     else:
+    #         bedrooms = "Could not find property detail"
+    #         bathrooms = "Could not find property detail"
+    #         property_type = "Could not find property detail"
+
+    #     return {"type": property_type, "bedrooms": bedrooms, "bathrooms": bathrooms}
+
+    # def extract_property_details(self, overview, detail_name, detail_index):
+    #     property_detail = overview.find(
+    #         "span", text=re.compile(detail_name))
+    #     if property_detail is None:
+    #         try:
+    #             spans = overview.find_all("li")[
+    #                 detail_index].find_all("span")
+    #             property_detail_by_index = spans[1] if len(
+    #                 spans) == 2 else spans[0]
+    #         except IndexError as err:
+    #             print(f"Cannot find property detail: {err}")
+    #             property_detail_by_index = None
+    #         property_detail = property_detail_by_index
+
+    #     return property_detail.get_text() if len(property_detail) else f"unable to find {detail_name}s"
+
+    # def get_property_type(self, overview):
+    #     header = overview.find("h2")
+    #     try:
+    #         if len(header):
+    #             return header.get_text().split("hosted")[0].strip()
+    #     except TypeError:
+    #         return "unable to find property type"
+
+
+    def __str__(self):
+        # details = cleandoc(f"""Name: {self._property_name}
+        # Type: {self.property_details.get("type")}
+        # Bedrooms: {self.property_details.get("bedrooms")}
+        # Bathrooms: {self.property_details.get("bathrooms")}
+        # {'-' * 30}
+        # """)
+        details = cleandoc(f"""Name: {self._html}
+        {'-' * 30}
+        """)
+        return details
